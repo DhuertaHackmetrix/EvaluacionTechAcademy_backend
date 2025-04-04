@@ -1,18 +1,28 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
+import sequelize from './config/database';
+import './models/clima'; 
+import './models/accion';
+import './models/registro';
 
-dotenv.config();
-const app = express();
+async function createDatabaseIfNotExist() {
+  try {
+    await sequelize.query('CREATE DATABASE IF NOT EXISTS tiempo_bd;');
+    console.log('✅ Base de datos creada o ya existe');
+  } catch (error) {
+    console.error('❌ Error al crear la base de datos:', error);
+  }
+}
 
-app.use(cors());
-app.use(express.json());
+(async () => {
+  try {
+    await createDatabaseIfNotExist();
 
-app.get("/", (req, res) => {
-  res.send("API de Clima funcionando 🚀");
-});
+    await sequelize.authenticate();
+    console.log('✅ Conexión exitosa a la base de datos');
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+    // Sincronizar todos los modelos con las relaciones
+    await sequelize.sync({ force: true }); // Cambia a `force: false` en producción
+    console.log('✅ Tablas sincronizadas con éxito');
+  } catch (error) {
+    console.error('❌ Error de conexión:', error);
+  }
+})();
