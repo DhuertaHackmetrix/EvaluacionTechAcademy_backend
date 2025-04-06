@@ -1,4 +1,3 @@
-import Accion from "../models/accion";
 export interface IAccion{
     id: number;
     nombre: string;
