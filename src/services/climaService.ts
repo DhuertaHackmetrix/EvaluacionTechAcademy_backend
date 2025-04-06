@@ -8,11 +8,11 @@ dotenv.config();
 class ClimaService implements IClimaService{
   async obtenerClimaActual(ciudad: String): Promise<any> {
     try {
-      const apiKey = '6ea9bccbd09826c972b32e386ef44ad1';
-
+      const apiKey = process.env.OPENWEATHERMAP_API_KEY;
       const response = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather?q=${ciudad}&appid=${apiKey}&units=metric&lang=es`
       );
+      
 
       const data = response.data;
       const nombre = data.weather[0].main;
@@ -36,6 +36,7 @@ class ClimaService implements IClimaService{
       return clima;
 
     } catch (error) {
+        
       console.error('Error al obtener clima actual:', error);
       throw new Error('No se pudo obtener el clima');
     }
