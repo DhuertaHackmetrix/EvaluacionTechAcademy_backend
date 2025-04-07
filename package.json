@@ -62,7 +62,6 @@
       "ts-jest": {
         "tsconfig": "tsconfig.json"
       }
-    },
-    "setupFiles": ["<rootDir>/src/tests/setup.ts"]
+    }
   }
 }
