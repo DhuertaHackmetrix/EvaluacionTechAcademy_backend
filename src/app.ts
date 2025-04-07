@@ -2,6 +2,7 @@ import sequelize from './config/database';
 import './models/clima'; 
 import './models/accion';
 import './models/registro';
+import './models/relaciones';
 import express from 'express';
 import climaRoutes from './routes/climaRoutes';
 import dotenv from 'dotenv';
