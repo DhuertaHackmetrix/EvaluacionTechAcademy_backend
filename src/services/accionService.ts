@@ -54,21 +54,15 @@ class AccionService implements IAccion{
         return deleteAccion;
     }
 
-    updateAccion(id: number, accion: string): Promise<any> {
+   async updateAccion(id: number, accion: string): Promise<any> {
         if (!id) {
             throw new Error('Id no puede ser vacio');
         }
         if (!accion) {
             throw new Error('Accion no puede ser vacio');
         }
-    
-        // Asegurarse de que el id sea un número
-        const parsedId = Number(id);
-        if (isNaN(parsedId)) {
-            throw new Error('El ID debe ser un número válido');
-        }
-    
-        const updateAccion = Accion.update({ accion }, { where: { id: parsedId } });
+        const updateAccion = await Accion.update(
+            { nombre: accion },{where:{id}});
         return updateAccion;
     }
     
