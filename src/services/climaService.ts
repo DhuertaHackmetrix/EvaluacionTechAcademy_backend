@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Clima from '../models/clima';
+import Accion from '../models/accion';
 import dotenv from 'dotenv';
 import { IClimaService } from '../interfaces/climaServiceInterface';
 
@@ -39,6 +40,17 @@ class ClimaService implements IClimaService{
         
       console.error('Error al obtener clima actual:', error);
       throw new Error('No se pudo obtener el clima');
+    }
+  }
+  async elDiaEstaPara(ciudad: String): Promise<[any[],any]> {
+    try {
+      const clima = await this.obtenerClimaActual(ciudad);
+      const acciones = await Accion.findAll({ where: { clima_id: clima.id } });
+      const accionElegida = acciones[Math.floor(Math.random() * acciones.length)];
+      return [acciones, accionElegida]; 
+    } catch (error) {
+      console.error('Error al obtener acciones:', error);
+      throw new Error('No se pudo obtener las acciones');
     }
   }
 }

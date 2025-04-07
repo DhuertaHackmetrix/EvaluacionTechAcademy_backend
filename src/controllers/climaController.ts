@@ -19,6 +19,21 @@ class ClimaController {
       console.log(process.env.OPENWEATHERMAP_API_KEY);
     }
   }
+  async elDiaEstaPara(req: Request, res: Response): Promise<void> {
+    const { ciudad } = req.params;
+
+    if (!ciudad) {
+      res.status(400).json({ mensaje: 'Debes proporcionar una ciudad.' });
+      return;
+    }
+
+    try {
+      const acciones = await climaService.elDiaEstaPara(ciudad);
+      res.status(200).json(acciones);
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al obtener las acciones.', error });
+    }
+  }
 }
 
 export default new ClimaController();
