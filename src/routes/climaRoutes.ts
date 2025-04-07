@@ -12,5 +12,6 @@ router.get('/leerAccion/:id', (req, res) => accionController.leerAccion(req, res
 router.delete('/deleteAccion/:id', (req, res) => accionController.deleteAccion(req, res));
 router.post('/updateAccion/:id', (req, res) => accionController.updateAccion(req, res));
 router.get('/getAllAcciones', (req, res) => accionController.getAllAcciones(req, res));
+router.get('/elDiaEstaPara/:ciudad', (req, res) => climaController.elDiaEstaPara(req, res));
 
 export default router;
