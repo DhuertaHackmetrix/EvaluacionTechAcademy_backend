@@ -40,9 +40,6 @@ class RegistroService implements IRegistro{
     
             const registrosJSON = registros.map(registro => registro.toJSON());
             
-            console.log('Ejemplo de registro convertido:', 
-                registrosJSON.length > 0 ? JSON.stringify(registrosJSON[0], null, 2) : 'No hay registros');
-    
             const totalPorClima = registrosJSON.reduce((resultado, registro) => {
                 if (!registro.accion) {
                     console.log('Registro sin acción:', registro.id);
@@ -81,7 +78,7 @@ class RegistroService implements IRegistro{
                 }
                 
                 return resultado;
-            }, {}); // Iniciar con un objeto vacío como acumulador
+            }, {});
             
             return totalPorClima;
         } catch (error) {
