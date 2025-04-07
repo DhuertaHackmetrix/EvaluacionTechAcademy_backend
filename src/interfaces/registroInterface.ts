@@ -1,7 +1,5 @@
 export interface IRegistro {
-    id: number;
-    comentario: string;
-    accion_id: number;
-    fecha: Date;
+  registrarAccion(comentario: string, accion_id: number, fecha:Date): Promise<any>;
+  totalDeAcciones(): Promise<any>;
   }
   

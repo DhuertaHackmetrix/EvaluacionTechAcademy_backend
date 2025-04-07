@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import climaController from '../controllers/climaController';
 import accionController from '../controllers/accionController';
+import registroController from '../controllers/registroController';
+
 const router = Router();
 
 // Ruta de clima
@@ -12,6 +14,7 @@ router.get('/leerAccion/:id', (req, res) => accionController.leerAccion(req, res
 router.delete('/deleteAccion/:id', (req, res) => accionController.deleteAccion(req, res));
 router.post('/updateAccion/:id', (req, res) => accionController.updateAccion(req, res));
 router.get('/getAllAcciones', (req, res) => accionController.getAllAcciones(req, res));
-router.get('/elDiaEstaPara/:ciudad', (req, res) => climaController.elDiaEstaPara(req, res));
-
+router.post('/elDiaEstaPara/:ciudad', (req, res) => climaController.elDiaEstaPara(req, res));
+router.post('/RegistrarAccion', (req, res) => climaController.RegistrarAccion(req, res));
+router.get('/totalDeAcciones', (req, res) => registroController.totalAcciones(req, res));
 export default router;
