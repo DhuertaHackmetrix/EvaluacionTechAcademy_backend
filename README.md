@@ -33,6 +33,9 @@ OPENWEATHERMAP_API_KEY=tu_api_key_aquí
 
 Asegúrate de tener MySQL instalado y ejecutándose en tu sistema
 
+# Ejecucion de tests
+npm run test:watch
+
 # Ejecución
 npm run dev
 
@@ -45,18 +48,25 @@ Endpoints de la API
 Clima
 
 POST /api/obtenerClimas - Obtiene el clima actual de una ciudad
+en Body:
+{"ciudad":"nombre_ciudad"}
+{"ciudad":"santiago"}
 
 POST /api/elDiaEstaPara/:ciudad - Recomienda actividades según el clima de la ciudad
 
 Acciones
 
 POST /api/crearAccion - Crea una nueva acción
+{ "accion":"vacilar",
+"nombreClima":"clear",
+"descripcionAccion":"carretito" }
 
 GET /api/leerAccion/:id - Obtiene detalles de una acción
 
 DELETE /api/deleteAccion/:id - Elimina una acción
 
 POST /api/updateAccion/:id - Actualiza una acción existente
+{ "accion": "ir al bosque" }
 
 GET /api/getAllAcciones - Obtiene todas las acciones disponibles
 

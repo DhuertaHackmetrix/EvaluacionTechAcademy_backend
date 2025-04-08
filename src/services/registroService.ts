@@ -59,16 +59,15 @@ class RegistroService implements IRegistro{
                 }
                 
                 if (resultado[nombreClima]) {
-                    resultado[nombreClima].count += 1;
+                    resultado[nombreClima].veces_realizada += 1;
                     resultado[nombreClima].acciones.push({
                         id: registro.accion.id,
                         nombre: registro.accion.nombre,
                         fecha: registro.fecha
                     });
                 } else {
-                    // Si no existe, crear una nueva entrada para este clima
                     resultado[nombreClima] = {
-                        count: 1,
+                        veces_realizada: 1,
                         acciones: [{
                             id: registro.accion.id,
                             nombre: registro.accion.nombre,
