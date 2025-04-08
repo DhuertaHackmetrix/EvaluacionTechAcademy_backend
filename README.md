@@ -40,10 +40,22 @@ npm run test:watch
 npm run dev
 
 
+# Flujo inicial
 
-Estructura del Proyecto
+1.al ejecutar el comando inicial se creara automatica la base de datos en mysql, debe tener mysql instalado y corriendo.
 
-Endpoints de la API
+2.Obtener climas, para obtener los climas debe llamar a la api /obtenerClimas especificada abajo y usar distintas ciudades, al realizar esto se crearan climas(Clouds,Clear,Rain)segun el tiempo en esa ciudad.
+
+3.Una vez teniendo todos los climas puede empezar a crear las acciones a realizar para cada clima segun indica la api /crearAccion ademas tener en cuenta que nombre_clima puede ser clouds,clear,rain como los mas comunes que entrega la api externa.
+
+4.Una vez realizado todo lo anterior puede utilizar la api /elDiaEstaPara/:ciudad y mostrara las acciones disponibles segun el clima de esa ciudad y elegira una aleatoriamente y la registrara
+
+Ejemplo completo:
+
+
+
+
+# Endpoints de la API
 
 Clima
 
@@ -52,7 +64,7 @@ en Body:
 {"ciudad":"nombre_ciudad"}
 {"ciudad":"santiago"}
 
-POST /api/elDiaEstaPara/:ciudad - Recomienda actividades según el clima de la ciudad
+POST /api/elDiaEstaPara/:ciudad - Recomienda actividades según el clima de la ciudad 
 
 Acciones
 
@@ -75,3 +87,5 @@ Registros
 POST /api/RegistrarAccion - Registra una acción realizada
 
 GET /api/totalDeAcciones - Obtiene estadísticas de acciones agrupadas por clima
+
+
