@@ -27,7 +27,7 @@ npm install
 Configuración
 
 Crea un archivo .env en la raíz del proyecto con las siguientes variables:
-en caso de no tener la apikey solicitarla a Diego Huerta
+en caso de no tener la apikey solicitarla a Diego Huerta 
 PORT=3000
 OPENWEATHERMAP_API_KEY=tu_api_key_aquí 
 USER_BD_NAME=""
