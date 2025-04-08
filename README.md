@@ -50,11 +50,11 @@ npm run dev
 
 1.al ejecutar el comando inicial se creara automatica la base de datos en mysql, debe tener mysql instalado y corriendo.
 
-2.Obtener climas, para obtener los climas debe llamar a la api /obtenerClimas especificada abajo y usar distintas ciudades, al realizar esto se crearan climas(Clouds,Clear,Rain)segun el tiempo en esa ciudad.
+2.Obtener climas, para obtener los climas debe llamar a la api /obtenerClimas especificada abajo y usar distintas ciudades, al realizar esto se crearan climas(Clouds,Clear,Rain)segun el tiempo en esa ciudad. fijarse bien dado que puede que en varias ciudades este el mismo clima y por ende no se cree el clima.
 
 3.Una vez teniendo todos los climas puede empezar a crear las acciones a realizar para cada clima segun indica la api /crearAccion ademas tener en cuenta que nombre_clima puede ser clouds,clear,rain como los mas comunes que entrega la api externa.
 
-4.Una vez realizado todo lo anterior puede utilizar la api /elDiaEstaPara/:ciudad y mostrara las acciones disponibles segun el clima de esa ciudad y elegira una aleatoriamente y la registrara
+4.Una vez realizado todo lo anterior puede utilizar la api /elDiaEstaPara/:ciudad y mostrara las acciones disponibles segun el clima de esa ciudad y elegira una aleatoriamente y la registrara, o usar la api /totalDeAcciones
 
 Ejemplo completo:
 
