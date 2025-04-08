@@ -1,26 +1,20 @@
-import sequelize from './config/database';
-import './models/clima'; 
-import './models/accion';
-import './models/registro';
-import './models/relaciones';
 import express from 'express';
-import climaRoutes from './routes/climaRoutes';
 import dotenv from 'dotenv';
 dotenv.config();
 
-async function createDatabaseIfNotExist() {
-  try {
-    await sequelize.query('CREATE DATABASE IF NOT EXISTS tiempo_bd;');
-    console.log('✅ Base de datos creada o ya existe');
-  } catch (error) {
-    console.error('❌ Error al crear la base de datos:', error);
-  }
-}
+import { createDatabaseIfNotExist} from './config/init';
+import './models/clima';
+import './models/accion';
+import './models/registro';
+import './models/relaciones';
+
+import climaRoutes from './routes/climaRoutes';
+
+// ⛔ importa sequelize DESPUÉS de crear la base de datos
+import sequelize from './config/database';
 
 const app = express();
 app.use(express.json());
-
-// Rutas
 app.use('/api', climaRoutes);
 
 (async () => {
@@ -36,8 +30,8 @@ app.use('/api', climaRoutes);
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
       console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
-    });    
+    });
   } catch (error) {
-    console.error('❌ Error de conexión:', error);
+    console.error('❌ Error al iniciar la app:', error);
   }
 })();
