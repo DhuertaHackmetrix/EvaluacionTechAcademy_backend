@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database';
+import sequelize from '../../config/database';
 
 const Clima = sequelize.define('climas', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },

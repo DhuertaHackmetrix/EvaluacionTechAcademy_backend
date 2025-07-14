@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import AccionService from '../services/accionService';
+import AccionService from '../../application/services/accionService';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -56,11 +56,7 @@ class AccionController {
     }
 
     try {
-      const resultado = await this.accionService.deleteAccion(Number(id));
-      if (resultado === 0) {
-        res.status(404).json({ mensaje: 'Acción no encontrada.' });
-        return;
-      }
+      await this.accionService.deleteAccion(Number(id));
       res.status(200).json({ mensaje: 'Acción eliminada con éxito.' });
     } catch (error) {
       res.status(500).json({ mensaje: 'Error al eliminar la acción.', error });
@@ -77,11 +73,7 @@ class AccionController {
     }
 
     try {
-      const resultado = await this.accionService.updateAccion(Number(id), accion);
-      if (resultado[0] === 0) {
-        res.status(404).json({ mensaje: 'Acción no encontrada.' });
-        return;
-      }
+      await this.accionService.updateAccion(Number(id), accion);
       res.status(200).json({ mensaje: 'Acción actualizada con éxito.' });
     } catch (error) {
       res.status(500).json({ mensaje: 'Error al actualizar la acción.', error });

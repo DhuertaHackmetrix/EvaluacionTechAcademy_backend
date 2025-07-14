@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import climaController from '../controllers/climaController';
-import { climaService } from '../services/climaService';
-import RegistroService from '../services/registroService';
+import climaController from '../infrastructure/controllers/climaController';
+import { climaService } from '../application/services/climaService';
+import RegistroService from '../application/services/registroService';
 
 jest.mock('../services/climaService');
 jest.mock('../services/registroService');

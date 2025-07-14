@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import RegistroService from '../services/registroService';
+import RegistroService from '../../application/services/registroService';
 import dotenv from 'dotenv';
 dotenv.config();
 class ClimaController {

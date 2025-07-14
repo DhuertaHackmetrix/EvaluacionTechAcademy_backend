@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import climaController from '../controllers/climaController';
-import accionController from '../controllers/accionController';
-import registroController from '../controllers/registroController';
+import climaController from '../infrastructure/controllers/climaController';
+import accionController from '../infrastructure/controllers/accionController';
+import registroController from '../infrastructure/controllers/registroController';
 
 const router = Router();
 

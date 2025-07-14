@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database';
+import sequelize from '../../config/database';
 
 const Accion = sequelize.define('Acciones', {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },

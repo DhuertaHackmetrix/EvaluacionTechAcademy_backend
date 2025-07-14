@@ -3,10 +3,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { createDatabaseIfNotExist} from './config/init';
-import './models/clima';
-import './models/accion';
-import './models/registro';
-import './models/relaciones';
+import './domain/models/clima';
+import './domain/models/accion';
+import './domain/models/registro';
+import './domain/models/relaciones';
 
 import climaRoutes from './routes/climaRoutes';
 

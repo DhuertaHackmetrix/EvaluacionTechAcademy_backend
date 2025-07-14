@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import accionController from '../controllers/accionController';
-import AccionService from '../services/accionService';
+import accionController from '../infrastructure/controllers/accionController';
+import AccionService from '../application/services/accionService';
 
 jest.mock('../services/accionService');
 

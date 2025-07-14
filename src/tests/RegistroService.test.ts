@@ -1,7 +1,7 @@
-import RegistroService from '../services/registroService';
-import Registro from '../models/registro';
-import Accion from '../models/accion';
-import Clima from '../models/clima';
+import RegistroService from '../application/services/registroService';
+import Registro from '../domain/models/registro';
+import Accion from '../domain/models/accion';
+import Clima from '../domain/models/clima';
 
 jest.spyOn(console, 'log').mockImplementation(() => {});
 jest.spyOn(console, 'error').mockImplementation(() => {});

@@ -1,6 +1,6 @@
-import AccionService from '../services/accionService';
-import Accion from '../models/accion';
-import Clima from '../models/clima';
+import AccionService from '../application/services/accionService';
+import Accion from '../domain/models/accion';
+import Clima from '../domain/models/clima';
 
 jest.spyOn(console, 'error').mockImplementation(() => {});
 

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import registroController from '../controllers/registroController';
-import RegistroService from '../services/registroService';
+import registroController from '../infrastructure/controllers/registroController';
+import RegistroService from '../application/services/registroService';
 
 jest.mock('../services/registroService');
 
