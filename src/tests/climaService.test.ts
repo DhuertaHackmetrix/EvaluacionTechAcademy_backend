@@ -1,6 +1,7 @@
 import { climaService } from '../application/services/climaService';
 import Clima from '../domain/models/clima';
 import Accion from '../domain/models/accion';
+import ClimaEntity from '../domain/entities/climaEntity';
 import axios from 'axios';
 
 jest.mock('axios');
