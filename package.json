@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/DhuertaHackmetrix/EvaluacionTechAcademy_backend#readme",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
     "axios": "^1.8.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -47,8 +48,14 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testMatch": ["**/*.test.ts"],
-    "moduleFileExtensions": ["ts", "js", "json"],
+    "testMatch": [
+      "**/*.test.ts"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
@@ -57,7 +64,10 @@
     },
     "collectCoverage": true,
     "coverageDirectory": "coverage",
-    "coverageReporters": ["text", "lcov"],
+    "coverageReporters": [
+      "text",
+      "lcov"
+    ],
     "globals": {
       "ts-jest": {
         "tsconfig": "tsconfig.json"
