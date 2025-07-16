@@ -15,8 +15,24 @@ import emailRoutes from './routes/emailRoutes';
 import sequelize from './config/database';
 
 const app = express();
+
+// Middleware para JSON parsing con mejor manejo de errores
 app.use(express.json());
-app.use('/api/clima', climaRoutes);
+
+// Middleware para manejar errores de JSON parsing
+app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (error instanceof SyntaxError && 'body' in error) {
+    console.error('❌ Error de JSON parsing:', error.message);
+    return res.status(400).json({ 
+      error: 'JSON malformado', 
+      mensaje: 'Por favor verifica que el JSON esté bien formateado',
+      detalles: error.message
+    });
+  }
+  next();
+});
+
+app.use('/api', climaRoutes);
 app.use('/api/email', emailRoutes);
 
 (async () => {

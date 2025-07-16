@@ -67,8 +67,14 @@ Clima
 
 POST /api/obtenerClimas - Obtiene el clima actual de una ciudad
 en Body:
-{"ciudad":"nombre_ciudad"}
+```json
 {"ciudad":"santiago"}
+```
+
+Ejemplo de uso:
+```json
+{"ciudad":"nombre_ciudad"}
+```
 
 POST /api/elDiaEstaPara/:ciudad - Recomienda actividades según el clima de la ciudad 
 
