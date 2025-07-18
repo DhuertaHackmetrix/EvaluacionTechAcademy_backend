@@ -3,13 +3,15 @@ import RegistroEntity from '../../domain/entities/registroEntity';
 import { IRegistroRepository } from '../../domain/repositories/registroRepository';
 import RegistroRepository from '../../infrastructure/repositories/RegistroRepository';
 import { IRegistro } from '../../domain/interfaces/registroInterface';
+import { RegistroSemanalDTO } from '../../domain/DTO/RegistroSemanalDTO';
+
 dotenv.config();
 
 class RegistroService implements IRegistro {
   private registroRepository: IRegistroRepository;
 
-  constructor() {
-    this.registroRepository = new RegistroRepository();
+  constructor(registroRepository: IRegistroRepository) {
+    this.registroRepository = registroRepository;
   }
 
   async registrarAccion(comentario: string, accion_id: number): Promise<RegistroEntity> {
@@ -20,6 +22,23 @@ class RegistroService implements IRegistro {
       registroData.accion_id,
       registroData.fecha
     );
+  }
+
+  async getWeeklyRegistrosGroupedByAccion(): Promise<RegistroSemanalDTO[]> {
+    try {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 7);
+
+      // El repositorio ahora devuelve los datos agrupados y contados
+      const weeklyRegistros = await this.registroRepository.findWeeklyRegistrosWithAccion(startDate, endDate);
+      
+      // El resultado ya tiene el formato de RegistroSemanalDTO, solo necesita un cast
+      return weeklyRegistros as RegistroSemanalDTO[];
+    } catch (error) {
+      console.error('Error al obtener registros semanales agrupados por acción:', error);
+      throw error;
+    }
   }
 
   async totalDeAcciones(): Promise<any> {

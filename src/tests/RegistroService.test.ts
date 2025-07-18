@@ -1,338 +1,93 @@
 import RegistroService from '../application/services/registroService';
-import Registro from '../domain/models/registro';
-import Accion from '../domain/models/accion';
-import Clima from '../domain/models/clima';
+import { IRegistroRepository } from '../domain/repositories/registroRepository';
+import RegistroEntity from '../domain/entities/registroEntity';
+import { RegistroSemanalDTO } from '../domain/DTO/RegistroSemanalDTO';
 
-jest.spyOn(console, 'log').mockImplementation(() => {});
 jest.spyOn(console, 'error').mockImplementation(() => {});
-
-jest.mock('../models/registro');
-jest.mock('../models/accion');
-jest.mock('../models/clima');
 
 describe('RegistroService', () => {
   let registroService: RegistroService;
-  
+  let mockRegistroRepository: jest.Mocked<IRegistroRepository>;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    
-    registroService = new RegistroService();
+    mockRegistroRepository = {
+      registrarAccion: jest.fn(),
+      findWeeklyRegistrosWithAccion: jest.fn(),
+      findAllWithRelations: jest.fn(),
+      countByAccionId: jest.fn(),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+    };
+    registroService = new RegistroService(mockRegistroRepository);
   });
-  
+
   describe('registrarAccion', () => {
-    it('debería crear un registro con los datos correctos', async () => {
-      const mockRegistro = {
+    it('debería registrar una acción y devolver una RegistroEntity', async () => {
+      const mockRegistroData = {
         id: 1,
-        comentario: 'Test comentario',
-        accion_id: 2,
-        fecha: new Date('2025-04-07')
+        comentario: 'Test',
+        accion_id: 1,
+        fecha: new Date(),
       };
-      
-      (Registro.create as jest.Mock).mockResolvedValue(mockRegistro);
-      
-      const result = await registroService.registrarAccion('Test comentario', 2);
-      
-      expect(Registro.create).toHaveBeenCalledWith({
-        comentario: 'Test comentario',
-        accion_id: 2,
-        fecha: expect.any(Date)
-      });
-      
-      expect(result).toEqual(mockRegistro);
+      mockRegistroRepository.registrarAccion.mockResolvedValue(mockRegistroData);
+
+      const result = await registroService.registrarAccion('Test', 1);
+
+      expect(mockRegistroRepository.registrarAccion).toHaveBeenCalledWith('Test', 1);
+      expect(result).toBeInstanceOf(RegistroEntity);
+      expect(result.id).toBe(1);
     });
   });
-  
-    describe('totalDeAcciones', () => {
-      it('debería devolver mensaje cuando no hay registros', async () => {
-        (Registro.findAll as jest.Mock).mockResolvedValue([]);
-        
-        const resultado = await registroService.totalDeAcciones();
-        
-        expect(resultado).toEqual({ mensaje: 'No hay registros de acciones.' });
-        
-        expect(Registro.findAll).toHaveBeenCalledWith({
-          include: [{
-            model: Accion,
-            as: 'accion',
-            include: [{
-              model: Clima,
-              as: 'clima'
-            }]
-          }]
-        });
-      });
-      
-      it('debería agrupar registros por tipo de clima correctamente', async () => {
-        const mockRegistros = [
-          {
-            toJSON: () => ({
-              id: 1,
-              comentario: 'Primer registro',
-              accion_id: 1,
-              fecha: new Date('2025-04-07'),
-              accion: {
-                id: 1,
-                nombre: 'ir a la playa',
-                clima_id: 1,
-                clima: {
-                  id: 1,
-                  nombre: 'Clear'
-                }
-              }
-            })
-          },
-          {
-            toJSON: () => ({
-              id: 2,
-              comentario: 'Segundo registro',
-              accion_id: 2,
-              fecha: new Date('2025-04-08'),
-              accion: {
-                id: 2,
-                nombre: 'quedarse en casa',
-                clima_id: 2,
-                clima: {
-                  id: 2,
-                  nombre: 'Rain'
-                }
-              }
-            })
-          },
-          {
-            toJSON: () => ({
-              id: 3,
-              comentario: 'Tercer registro',
-              accion_id: 3,
-              fecha: new Date('2025-04-09'),
-              accion: {
-                id: 3,
-                nombre: 'ir al cine',
-                clima_id: 2,
-                clima: {
-                  id: 2,
-                  nombre: 'Rain'
-                }
-              }
-            })
-          }
-        ];
-        
-        (Registro.findAll as jest.Mock).mockResolvedValue(mockRegistros);
-        
-        const resultado = await registroService.totalDeAcciones();
-        
-        expect(resultado).toEqual({
-          'Clear': {
-            count: 1,
-            acciones: [
-              {
-                id: 1,
-                nombre: 'ir a la playa',
-                fecha: expect.any(Date)
-              }
-            ]
-          },
-          'Rain': {
-            count: 2,
-            acciones: [
-              {
-                id: 2,
-                nombre: 'quedarse en casa',
-                fecha: expect.any(Date)
-              },
-              {
-                id: 3,
-                nombre: 'ir al cine',
-                fecha: expect.any(Date)
-              }
-            ]
-          }
-        });
-      });
-      
-      it('debería manejar correctamente registros sin acción', async () => {
-        const mockRegistroSinAccion = [
-          {
-            toJSON: () => ({
-              id: 1,
-              comentario: 'Registro sin acción',
-              accion_id: null,
-              fecha: new Date('2025-04-07')
-            })
-          }
-        ];
-        
-        (Registro.findAll as jest.Mock).mockResolvedValue(mockRegistroSinAccion);
-        
-        const resultado = await registroService.totalDeAcciones();
-        
-        expect(Object.keys(resultado).length).toBe(0);
-        
-        expect(console.log).toHaveBeenCalledWith(
-          'Registro sin acción:', 
-          1
-        );
-      });
-      
-      it('debería manejar correctamente acciones sin clima', async () => {
-        const mockRegistroSinClima = [
-          {
-            toJSON: () => ({
-              id: 1,
-              comentario: 'Registro con acción sin clima',
-              accion_id: 1,
-              fecha: new Date('2025-04-07'),
-              accion: {
-                id: 1,
-                nombre: 'acción sin clima',
-                clima_id: null
-              }
-            })
-          }
-        ];
-        
-        (Registro.findAll as jest.Mock).mockResolvedValue(mockRegistroSinClima);
-        
-        const resultado = await registroService.totalDeAcciones();
-        
-        expect(Object.keys(resultado).length).toBe(0);
-        
-        expect(console.log).toHaveBeenCalledWith(
-          'Acción sin clima:', 
-          1
-        );
-      });
-      
-      it('debería manejar correctamente climas sin nombre', async () => {
-        const mockRegistroClimaSinNombre = [
-          {
-            toJSON: () => ({
-              id: 1,
-              comentario: 'Registro con clima sin nombre',
-              accion_id: 1,
-              fecha: new Date('2025-04-07'),
-              accion: {
-                id: 1,
-                nombre: 'acción con clima sin nombre',
-                clima_id: 1,
-                clima: {
-                  id: 1,
-                  nombre: null
-                }
-              }
-            })
-          }
-        ];
-        
-        (Registro.findAll as jest.Mock).mockResolvedValue(mockRegistroClimaSinNombre);
-        
-        const resultado = await registroService.totalDeAcciones();
-        
-        expect(Object.keys(resultado).length).toBe(0);
-        
-        expect(console.log).toHaveBeenCalledWith(
-          'Clima sin nombre:', 
-          1
-        );
-      });
-      
-      it('debería manejar correctamente un error en la consulta', async () => {
-        const errorMock = new Error('Error en la consulta a la base de datos');
-        (Registro.findAll as jest.Mock).mockRejectedValue(errorMock);
-        
-        await expect(registroService.totalDeAcciones())
-          .rejects
-          .toThrow('Error en la consulta a la base de datos');
-        
-        expect(console.error).toHaveBeenCalledWith(
-          'Error al obtener total de acciones:', 
-          errorMock
-        );
-      });
-      
-      it('debería agregar correctamente múltiples acciones del mismo clima', async () => {
-        const mockRegistrosMismoClima = [
-          {
-            toJSON: () => ({
-              id: 1,
-              comentario: 'Primer registro - Sunny',
-              accion_id: 1,
-              fecha: new Date('2025-04-07'),
-              accion: {
-                id: 1,
-                nombre: 'ir a la playa',
-                clima_id: 1,
-                clima: {
-                  id: 1,
-                  nombre: 'Sunny'
-                }
-              }
-            })
-          },
-          {
-            toJSON: () => ({
-              id: 2,
-              comentario: 'Segundo registro - Sunny',
-              accion_id: 2,
-              fecha: new Date('2025-04-08'),
-              accion: {
-                id: 2,
-                nombre: 'hacer picnic',
-                clima_id: 1,
-                clima: {
-                  id: 1,
-                  nombre: 'Sunny'
-                }
-              }
-            })
-          },
-          {
-            toJSON: () => ({
-              id: 3,
-              comentario: 'Tercer registro - Sunny',
-              accion_id: 3,
-              fecha: new Date('2025-04-09'),
-              accion: {
-                id: 3,
-                nombre: 'pasear en el parque',
-                clima_id: 1,
-                clima: {
-                  id: 1,
-                  nombre: 'Sunny'
-                }
-              }
-            })
-          }
-        ];
-        
-        (Registro.findAll as jest.Mock).mockResolvedValue(mockRegistrosMismoClima);
-        
-        const resultado = await registroService.totalDeAcciones();
-        
-        expect(Object.keys(resultado).length).toBe(1);
-        expect(resultado).toHaveProperty('Sunny');
-        
-        expect(resultado.Sunny.count).toBe(3);
-        
-        expect(resultado.Sunny.acciones.length).toBe(3);
-        
-        expect(resultado.Sunny.acciones).toEqual(expect.arrayContaining([
-          {
+
+  describe('getWeeklyRegistrosGroupedByAccion', () => {
+    it('debería devolver los registros semanales agrupados', async () => {
+      const mockData: RegistroSemanalDTO[] = [
+        { accionNombre: 'Correr', totalVeces: 5 },
+        { accionNombre: 'Nadar', totalVeces: 2 },
+      ];
+      mockRegistroRepository.findWeeklyRegistrosWithAccion.mockResolvedValue(mockData);
+
+      const result = await registroService.getWeeklyRegistrosGroupedByAccion();
+
+      expect(mockRegistroRepository.findWeeklyRegistrosWithAccion).toHaveBeenCalled();
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('totalDeAcciones', () => {
+    it('debería devolver el total de acciones agrupadas por clima', async () => {
+      const mockRegistros = [
+        {
+          toJSON: () => ({
             id: 1,
-            nombre: 'ir a la playa',
-            fecha: expect.any(Date)
-          },
-          {
+            comentario: 'test',
+            accion_id: 1,
+            fecha: new Date(),
+            accion: { id: 1, nombre: 'Accion 1', clima: { id: 1, nombre: 'Soleado' } },
+          }),
+        },
+        {
+          toJSON: () => ({
             id: 2,
-            nombre: 'hacer picnic',
-            fecha: expect.any(Date)
-          },
-          {
-            id: 3,
-            nombre: 'pasear en el parque',
-            fecha: expect.any(Date)
-          }
-        ]));
-      });
+            comentario: 'test 2',
+            accion_id: 2,
+            fecha: new Date(),
+            accion: { id: 2, nombre: 'Accion 2', clima: { id: 1, nombre: 'Soleado' } },
+          }),
+        },
+      ];
+      mockRegistroRepository.findAllWithRelations.mockResolvedValue(mockRegistros as any);
+
+      const result = await registroService.totalDeAcciones();
+
+      expect(result['Soleado'].veces_realizada).toBe(2);
+    });
+
+    it('debería devolver un mensaje si no hay registros', async () => {
+        mockRegistroRepository.findAllWithRelations.mockResolvedValue([]);
+        const result = await registroService.totalDeAcciones();
+        expect(result).toEqual({ mensaje: 'No hay registros de acciones.' });
     });
   });
+});
