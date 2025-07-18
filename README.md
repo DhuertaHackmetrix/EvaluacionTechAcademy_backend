@@ -45,8 +45,9 @@ Asegúrate de tener MySQL instalado y ejecutándose en tu sistema
 # Ejecucion de tests
 npm test
 
+
 # Ejecución
-npm start
+npm run dev
 
 
 # Flujo inicial
