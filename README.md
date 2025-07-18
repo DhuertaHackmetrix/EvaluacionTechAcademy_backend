@@ -125,6 +125,8 @@ POST /api/email/send-welcome - Envía un correo de bienvenida
   "email": "destinatario@example.com"
 }
 ```
+los endpoints estan configurados para el tiempo respectivo para pruebas modificar en emailJobs.ts ejemplo para 30 segundos:  
+ const job = cron.schedule('*/30 * * * * *', async () => {
 
 POST /api/email/send-daily-summary - Envía un resumen diario de actividades
 ```json
@@ -140,6 +142,7 @@ POST /api/email/send-weekly-summary - Envía un resumen semanal de actividades
   "email": "destinatario@example.com"
 }
 
+
 # Flujo de utilización de los endpoints
 
 1.  **Obtener climas:**
@@ -147,7 +150,9 @@ POST /api/email/send-weekly-summary - Envía un resumen semanal de actividades
     *   Body: `{"ciudad": "santiago"}`
 2.  **Crear acciones:**
     *   `POST http://localhost:3000/api/crearAccion`
-    *   Body: `{"accion": "ir a la playa", "nombreClima": "clear", "descripcionAccion": "disfrutar del sol"}`
+    *   Body: `{"accion": "ir a la playa", "nombreClima": "clear", "descripcionAccion": "disfrutar del sol"} otro ejemplo { "accion":"leer en casa",
+"nombreClima":"clouds",
+"descripcionAccion":"casitaa pelis" }`
 3.  **Obtener recomendaciones:**
     *   `POST http://localhost:3000/api/elDiaEstaPara/santiago`
 4.  **Registrar acciones:**

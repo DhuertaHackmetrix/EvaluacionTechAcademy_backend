@@ -58,7 +58,7 @@ console.log('🕒 [CRON-AUTO] Tareas automáticas programadas.');
 export function createDailySummaryJob(email: string, ciudad: string): ScheduledTask {
   console.log(`🕒 Creando job dinámico de resumen diario para ${email} en ${ciudad}`);
   
-  const job = cron.schedule('*/30 * * * * *', async () => {
+  const job = cron.schedule('0 8 * * *', async () => {
     console.log(`🕒 [JOB-DINAMICO] Ejecutando resumen diario para ${email}...`);
     try {
       await emailService.sendDailySummaryEmail(email, ciudad);
@@ -78,7 +78,7 @@ export function createDailySummaryJob(email: string, ciudad: string): ScheduledT
 export function createWeeklySummaryJob(email: string): ScheduledTask {
   console.log(`🕒 Creando job dinámico de resumen semanal para ${email}`);
 
-  const job = cron.schedule('*/30 * * * * *', async () => {
+  const job = cron.schedule('0 8 * * 1', async () => {
     console.log(`🕒 [JOB-DINAMICO] Ejecutando resumen semanal para ${email}...`);
     try {
       await emailService.sendWeeklySummaryEmail(email);
