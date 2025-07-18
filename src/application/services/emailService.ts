@@ -1,29 +1,34 @@
 import sgMail from '@sendgrid/mail';
 import dotenv from 'dotenv';
+import ClimaService from './climaService';
+import AccionService from './accionService';
+import RegistroService from './registroService';
+import { RegistroSemanalDTO } from '../../domain/DTO/RegistroSemanalDTO';
 
 dotenv.config();
 
 class EmailService {
-  constructor() {
+  private climaService: ClimaService;
+  private accionService: AccionService;
+  private registroService: RegistroService;
+
+  constructor(
+    climaService: ClimaService,
+    accionService: AccionService,
+    registroService: RegistroService
+  ) {
+    this.climaService = climaService;
+    this.accionService = accionService;
+    this.registroService = registroService;
     const apiKey = process.env.SENDGRID_API_KEY;
     if (!apiKey) {
-      throw new Error('SENDGRID_API_KEY no está configurada en las variables de entorno');
+      console.warn('SENDGRID_API_KEY no está configurada. Los correos no se enviarán.');
+    } else {
+      sgMail.setApiKey(apiKey);
     }
-    sgMail.setApiKey(apiKey);
   }
 
   async sendEmail(to: string, subject: string, text: string, html?: string): Promise<void> {
-    // Modo desarrollo - simular envío solo si no hay API key válida
-    if (!process.env.SENDGRID_API_KEY || process.env.SENDGRID_API_KEY === 'your_sendgrid_api_key_here') {
-      console.log('📧 [SIMULADOR] Email que se enviaría:');
-      console.log(`   Para: ${to}`);
-      console.log(`   De: dhuerta@hackmetrix.com`);
-      console.log(`   Asunto: ${subject}`);
-      console.log(`   Mensaje: ${text}`);
-      console.log('✅ Email simulado enviado exitosamente');
-      return;
-    }
-
     const msg = {
       to,
       from: 'dhuerta@hackmetrix.com', // Email verificado en SendGrid
@@ -34,7 +39,7 @@ class EmailService {
 
     try {
       await sgMail.send(msg);
-      console.log('✅ Email enviado exitosamente');
+      console.log(`✅ Email enviado exitosamente a ${to}`);
     } catch (error: any) {
       console.error('❌ Error al enviar email:', error);
       if (error.response && error.response.body) {
@@ -60,6 +65,45 @@ class EmailService {
     `;
 
     await this.sendEmail(to, subject, text, html);
+  }
+
+  async sendDailySummaryEmail(to: string, ciudad: string): Promise<void> {
+    console.log(`--- Preparando resumen diario para ${to} en ${ciudad} ---`);
+    const climaActual = await this.climaService.obtenerClimaActual(ciudad);
+    const { mejores, peores } = await this.accionService.obtenerTopAccionesPorClima(climaActual, 3);
+
+    const subject = `Panoramas recomendados para hoy en ${ciudad}`;
+    const html = `
+      <h2>Panoramas recomendados para hoy (${climaActual.nombre})</h2>
+      <h3>Mejores acciones:</h3>
+      <ul>
+        ${mejores.map(a => `<li><b>${a.nombre}</b>: ${a.descripcion} (Puntaje: ${a.puntaje})</li>`).join('')}
+      </ul>
+      <h3>Acciones menos recomendadas:</h3>
+      <ul>
+        ${peores.map(a => `<li><b>${a.nombre}</b>: ${a.descripcion} (Puntaje: ${a.puntaje})</li>`).join('')}
+      </ul>
+    `;
+
+    await this.sendEmail(to, subject, 'Resumen diario de actividades', html);
+  }
+
+  async sendWeeklySummaryEmail(to: string): Promise<void> {
+    console.log(`--- Preparando resumen semanal para ${to} ---`);
+    const weeklyRegistros = await this.registroService.getWeeklyRegistrosGroupedByAccion();
+
+    let emailContent = 'Total de acciones realizadas en esta semana:\n\n';
+    if (weeklyRegistros.length === 0) {
+      emailContent += 'No se realizaron acciones esta semana.';
+    } else {
+      weeklyRegistros.forEach((registro: RegistroSemanalDTO) => {
+        emailContent += `- ${registro.accionNombre}: ${registro.totalVeces} veces\n`;
+      });
+    }
+
+    const subject = 'Informe Semanal de Actividades';
+    const html = `<p>${emailContent.replace(/\n/g, '<br>')}</p>`;
+    await this.sendEmail(to, subject, emailContent, html);
   }
 }
 

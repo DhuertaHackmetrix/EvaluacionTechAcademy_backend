@@ -16,5 +16,5 @@ router.post('/updateAccion/:id', (req, res) => accionController.updateAccion(req
 router.get('/getAllAcciones', (req, res) => accionController.getAllAcciones(req, res));
 router.post('/elDiaEstaPara/:ciudad', (req, res) => climaController.elDiaEstaPara(req, res));
 router.post('/RegistrarAccion', (req, res) => climaController.RegistrarAccion(req, res));
-router.get('/totalDeAcciones', (req, res) => registroController.totalAcciones(req, res));
+router.get('/totalDeAcciones', (req, res) => registroController.totalDeAcciones(req, res));
 export default router;

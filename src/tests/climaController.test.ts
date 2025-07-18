@@ -1,15 +1,13 @@
 import { Request, Response } from 'express';
 import climaController from '../infrastructure/controllers/climaController';
-import { climaService } from '../application/services/climaService';
+import ClimaService from '../application/services/climaService';
 import RegistroService from '../application/services/registroService';
 
-jest.mock('../services/climaService');
-jest.mock('../services/registroService');
-
-jest.spyOn(console, 'log').mockImplementation(() => {});
-jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.mock('../application/services/climaService');
+jest.mock('../application/services/registroService');
 
 describe('ClimaController', () => {
+  let consoleErrorSpy: jest.SpyInstance;
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let responseJson: jest.Mock;
@@ -17,7 +15,7 @@ describe('ClimaController', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     responseJson = jest.fn();
     responseStatus = jest.fn().mockReturnThis();
     
@@ -26,6 +24,10 @@ describe('ClimaController', () => {
       json: responseJson,
       status: responseStatus
     };
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   describe('crearClima', () => {
@@ -41,11 +43,11 @@ describe('ClimaController', () => {
       
       mockRequest.body = { ciudad: 'Madrid' };
       
-      (climaService.obtenerClimaActual as jest.Mock).mockResolvedValue(mockClima);
+      (ClimaService.prototype.obtenerClimaActual as jest.Mock).mockResolvedValue(mockClima);
       
       await climaController.crearClima(mockRequest as Request, mockResponse as Response);
       
-      expect(climaService.obtenerClimaActual).toHaveBeenCalledWith('Madrid');
+      expect(ClimaService.prototype.obtenerClimaActual).toHaveBeenCalledWith('Madrid');
       
       expect(responseStatus).toHaveBeenCalledWith(201);
       expect(responseJson).toHaveBeenCalledWith(mockClima);
@@ -59,14 +61,14 @@ describe('ClimaController', () => {
       expect(responseStatus).toHaveBeenCalledWith(400);
       expect(responseJson).toHaveBeenCalledWith({ mensaje: 'Debes proporcionar una ciudad.' });
       
-      expect(climaService.obtenerClimaActual).not.toHaveBeenCalled();
+      expect(ClimaService.prototype.obtenerClimaActual).not.toHaveBeenCalled();
     });
 
     it('debería manejar errores del servicio correctamente', async () => {
       mockRequest.body = { ciudad: 'Madrid' };
       
       const error = new Error('Error al obtener clima');
-      (climaService.obtenerClimaActual as jest.Mock).mockRejectedValue(error);
+      (ClimaService.prototype.obtenerClimaActual as jest.Mock).mockRejectedValue(error);
       
       await climaController.crearClima(mockRequest as Request, mockResponse as Response);
       
@@ -76,7 +78,7 @@ describe('ClimaController', () => {
         error 
       });
       
-      expect(console.log).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
     });
   });
 
@@ -98,12 +100,12 @@ describe('ClimaController', () => {
       
       mockRequest.params = { ciudad: 'Madrid' };
       
-      (climaService.elDiaEstaPara as jest.Mock).mockResolvedValue([mockAcciones, mockAccionElegida]);
+      (ClimaService.prototype.elDiaEstaPara as jest.Mock).mockResolvedValue([mockAcciones, mockAccionElegida]);
       (RegistroService.prototype.registrarAccion as jest.Mock).mockResolvedValue(mockRegistro);
       
       await climaController.elDiaEstaPara(mockRequest as Request, mockResponse as Response);
       
-      expect(climaService.elDiaEstaPara).toHaveBeenCalledWith('Madrid');
+      expect(ClimaService.prototype.elDiaEstaPara).toHaveBeenCalledWith('Madrid');
       
       expect(RegistroService.prototype.registrarAccion).toHaveBeenCalledWith(
         'Hoy es un buen día para ir a la playa',
@@ -126,13 +128,13 @@ describe('ClimaController', () => {
       expect(responseStatus).toHaveBeenCalledWith(400);
       expect(responseJson).toHaveBeenCalledWith({ mensaje: 'Debes proporcionar una ciudad.' });
       
-      expect(climaService.elDiaEstaPara).not.toHaveBeenCalled();
+      expect(ClimaService.prototype.elDiaEstaPara).not.toHaveBeenCalled();
     });
 
     it('debería devolver error 404 cuando no hay acciones para el clima', async () => {
       mockRequest.params = { ciudad: 'Madrid' };
       
-      (climaService.elDiaEstaPara as jest.Mock).mockResolvedValue([[], undefined]);
+      (ClimaService.prototype.elDiaEstaPara as jest.Mock).mockResolvedValue([[], undefined]);
       
       await climaController.elDiaEstaPara(mockRequest as Request, mockResponse as Response);
       
@@ -146,7 +148,7 @@ describe('ClimaController', () => {
       mockRequest.params = { ciudad: 'Madrid' };
       
       const error = new Error('Error al obtener acciones');
-      (climaService.elDiaEstaPara as jest.Mock).mockRejectedValue(error);
+      (ClimaService.prototype.elDiaEstaPara as jest.Mock).mockRejectedValue(error);
       
       await climaController.elDiaEstaPara(mockRequest as Request, mockResponse as Response);
       

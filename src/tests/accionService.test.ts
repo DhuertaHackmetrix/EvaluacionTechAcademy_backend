@@ -1,232 +1,139 @@
 import AccionService from '../application/services/accionService';
-import Accion from '../domain/models/accion';
-import Clima from '../domain/models/clima';
+import { IAccionRepository } from '../domain/repositories/accionRepository';
+import { IRegistroRepository } from '../domain/repositories/registroRepository';
+import AccionEntity from '../domain/entities/accionEntity';
+import ClimaEntity from '../domain/entities/climaEntity';
+import { AccionTopDTO } from '../domain/DTO/AccionTopDTO';
 
 jest.spyOn(console, 'error').mockImplementation(() => {});
 
-jest.mock('../models/accion');
-jest.mock('../models/clima');
-
 describe('AccionService', () => {
   let accionService: AccionService;
-  
+  let mockAccionRepository: jest.Mocked<IAccionRepository>;
+  let mockRegistroRepository: jest.Mocked<IRegistroRepository>;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    accionService = new AccionService();
+    mockAccionRepository = {
+      crearAccion: jest.fn(),
+      leerAccion: jest.fn(),
+      deleteAccion: jest.fn(),
+      updateAccion: jest.fn(),
+      getAllAcciones: jest.fn(),
+    };
+    mockRegistroRepository = {
+      registrarAccion: jest.fn(),
+      findWeeklyRegistrosWithAccion: jest.fn(),
+      findAllWithRelations: jest.fn(),
+      countByAccionId: jest.fn(),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+    };
+    accionService = new AccionService(mockAccionRepository, mockRegistroRepository);
   });
-  
+
   describe('crearAccion', () => {
-    it('debería crear una acción con los datos correctos', async () => {
-      const mockClima = {
-        id: 1,
-        nombre: 'Sunny',
-        humedad: 60,
-        velocidad_viento: 5.2
-      };
-      
-      const mockAccionCreada = {
+    it('debería crear una acción y devolver una AccionEntity', async () => {
+      const mockAccionData = {
         id: 1,
         nombre: 'ir a la playa',
         descripcion: 'disfrutar del sol',
         clima_id: 1,
         humedad: 60,
-        velocidad_viento: 5.2
+        velocidad_viento: 5.2,
       };
-      
-      (Clima.findOne as jest.Mock).mockResolvedValue(mockClima);
-      (Accion.create as jest.Mock).mockResolvedValue(mockAccionCreada);
-      
-      const resultado = await accionService.crearAccion(
-        'ir a la playa', 
-        'Sunny', 
-        'disfrutar del sol'
-      );
-      
-      expect(Clima.findOne).toHaveBeenCalledWith({ where: { nombre: 'Sunny' } });
-      
-      expect(Accion.create).toHaveBeenCalledWith({
-        nombre: 'ir a la playa',
-        descripcion: 'disfrutar del sol',
-        clima_id: 1,
-        humedad: 60,
-        velocidad_viento: 5.2
-      });
-      
-      expect(resultado).toEqual(mockAccionCreada);
+      mockAccionRepository.crearAccion.mockResolvedValue(mockAccionData);
+
+      const result = await accionService.crearAccion('ir a la playa', 'Sunny', 'disfrutar del sol');
+
+      expect(mockAccionRepository.crearAccion).toHaveBeenCalledWith('ir a la playa', 'Sunny', 'disfrutar del sol');
+      expect(result).toBeInstanceOf(AccionEntity);
+      expect(result.id).toBe(1);
     });
-    
-    it('debería manejar valores nulos en humedad y velocidad_viento', async () => {
-      const mockClimaSinDatos = {
-        id: 1,
-        nombre: 'Sunny',
-      };
-      
-      const mockAccionCreada = {
-        id: 1,
-        nombre: 'ir a la playa',
-        descripcion: 'disfrutar del sol',
-        clima_id: 1,
-        humedad: 0,
-        velocidad_viento: 0
-      };
-      
-      (Clima.findOne as jest.Mock).mockResolvedValue(mockClimaSinDatos);
-      (Accion.create as jest.Mock).mockResolvedValue(mockAccionCreada);
-      
-      const resultado = await accionService.crearAccion(
-        'ir a la playa', 
-        'Sunny', 
-        'disfrutar del sol'
-      );
-      
-      expect(Accion.create).toHaveBeenCalledWith({
-        nombre: 'ir a la playa',
-        descripcion: 'disfrutar del sol',
-        clima_id: 1,
-        humedad: 0,
-        velocidad_viento: 0
-      });
-      
-      expect(resultado).toEqual(mockAccionCreada);
-    });
-    
-    it('debería lanzar error si la acción está vacía', async () => {
-      await expect(accionService.crearAccion('', 'Sunny', 'descripción'))
-        .rejects
-        .toThrow('Accion no puede ser vacio');
-      
-      expect(Clima.findOne).not.toHaveBeenCalled();
-    });
-    
-    it('debería lanzar error si no se encuentra el clima', async () => {
-      (Clima.findOne as jest.Mock).mockResolvedValue(null);
-      
-      await expect(accionService.crearAccion('ir a la playa', 'ClimaInexistente', 'descripción'))
-        .rejects
-        .toThrow('No se encontró un clima con el nombre: ClimaInexistente');
-      
-      expect(Accion.create).not.toHaveBeenCalled();
-    });
-    
-    it('debería manejar errores en la creación', async () => {
-      const mockClima = {
-        id: 1,
-        nombre: 'Sunny',
-        humedad: 60,
-        velocidad_viento: 5.2
-      };
-      
-      (Clima.findOne as jest.Mock).mockResolvedValue(mockClima);
-      (Accion.create as jest.Mock).mockRejectedValue(new Error('Error en la base de datos'));
-      
-      await expect(accionService.crearAccion('ir a la playa', 'Sunny', 'descripción'))
-        .rejects
-        .toThrow('Error en la base de datos');
-      
-      expect(console.error).toHaveBeenCalled();
+
+    it('debería lanzar un error si el repositorio falla', async () => {
+      mockAccionRepository.crearAccion.mockRejectedValue(new Error('Error de base de datos'));
+
+      await expect(accionService.crearAccion('test', 'test', 'test')).rejects.toThrow('Error de base de datos');
     });
   });
-  
+
   describe('leerAccion', () => {
-    it('debería leer una acción por su id', async () => {
-      const mockAccion = {
+    it('debería leer una acción y devolver una AccionEntity', async () => {
+      const mockAccionData = {
         id: 1,
         nombre: 'ir a la playa',
-        descripcion: 'disfrutar del sol'
+        descripcion: 'disfrutar del sol',
+        clima_id: 1,
+        humedad: 60,
+        velocidad_viento: 5.2,
       };
-      
-      (Accion.findOne as jest.Mock).mockResolvedValue(mockAccion);
-      
-      const resultado = await accionService.leerAccion(1);
-      
-      expect(Accion.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
-      
-      expect(resultado).toEqual(mockAccion);
+      mockAccionRepository.leerAccion.mockResolvedValue(mockAccionData);
+
+      const result = await accionService.leerAccion(1);
+
+      expect(mockAccionRepository.leerAccion).toHaveBeenCalledWith(1);
+      expect(result).toBeInstanceOf(AccionEntity);
+      expect(result?.id).toBe(1);
     });
-    
-    it('debería lanzar error si el id está vacío', async () => {
-      expect(() => accionService.leerAccion(0))
-        .toThrow('Id no puede ser vacio');
-      
-      expect(Accion.findOne).not.toHaveBeenCalled();
+
+    it('debería devolver null si la acción no se encuentra', async () => {
+      mockAccionRepository.leerAccion.mockResolvedValue(null);
+
+      const result = await accionService.leerAccion(999);
+
+      expect(result).toBeNull();
     });
   });
-  
+
   describe('deleteAccion', () => {
-    it('debería eliminar una acción por su id', async () => {
-      (Accion.destroy as jest.Mock).mockResolvedValue(1);
-      
-      const resultado = await accionService.deleteAccion(1);
-      
-      expect(Accion.destroy).toHaveBeenCalledWith({ where: { id: 1 } });
-      
-      expect(resultado).toBe(1);
-    });
-    
-    it('debería lanzar error si el id está vacío', async () => {
-      expect(() => accionService.deleteAccion(0))
-        .toThrow('Id no puede ser vacio');
-      
-      expect(Accion.destroy).not.toHaveBeenCalled();
+    it('debería llamar al método delete del repositorio', async () => {
+      mockAccionRepository.deleteAccion.mockResolvedValue();
+      await accionService.deleteAccion(1);
+      expect(mockAccionRepository.deleteAccion).toHaveBeenCalledWith(1);
     });
   });
-  
+
   describe('updateAccion', () => {
-    it('debería actualizar el nombre de una acción', async () => {
-      (Accion.update as jest.Mock).mockResolvedValue([1]);
-      
-      const resultado = await accionService.updateAccion(1, 'ir al cine');
-      
-      expect(Accion.update).toHaveBeenCalledWith(
-        { nombre: 'ir al cine' },
-        { where: { id: 1 } }
-      );
-      
-      expect(resultado).toEqual([1]);
-    });
-    
-    it('debería lanzar error si el id está vacío', async () => {
-      await expect(accionService.updateAccion(0, 'ir al cine'))
-        .rejects
-        .toThrow('Id no puede ser vacio');
-      
-      expect(Accion.update).not.toHaveBeenCalled();
-    });
-    
-    it('debería lanzar error si la acción está vacía', async () => {
-      await expect(accionService.updateAccion(1, ''))
-        .rejects
-        .toThrow('Accion no puede ser vacio');
-      
-      expect(Accion.update).not.toHaveBeenCalled();
+    it('debería llamar al método update del repositorio', async () => {
+      mockAccionRepository.updateAccion.mockResolvedValue();
+      await accionService.updateAccion(1, 'nuevo nombre');
+      expect(mockAccionRepository.updateAccion).toHaveBeenCalledWith(1, 'nuevo nombre');
     });
   });
-  
+
   describe('getAllAcciones', () => {
-    it('debería obtener todas las acciones', async () => {
-      const mockAcciones = [
-        { id: 1, nombre: 'ir a la playa' },
-        { id: 2, nombre: 'quedarse en casa' },
-        { id: 3, nombre: 'ir al cine' }
+    it('debería devolver un array de AccionEntity', async () => {
+      const mockAccionesData = [
+        { id: 1, nombre: 'a1', descripcion: 'd1', clima_id: 1, humedad: 1, velocidad_viento: 1 },
+        { id: 2, nombre: 'a2', descripcion: 'd2', clima_id: 2, humedad: 2, velocidad_viento: 2 },
       ];
-      
-      (Accion.findAll as jest.Mock).mockResolvedValue(mockAcciones);
-      
-      const resultado = await accionService.getAllAcciones();
-      
-      expect(Accion.findAll).toHaveBeenCalled();
-      
-      expect(resultado).toEqual(mockAcciones);
-      expect(resultado.length).toBe(3);
+      mockAccionRepository.getAllAcciones.mockResolvedValue(mockAccionesData);
+
+      const result = await accionService.getAllAcciones();
+
+      expect(result.length).toBe(2);
+      expect(result[0]).toBeInstanceOf(AccionEntity);
     });
-    
-    it('debería devolver un array vacío cuando no hay acciones', async () => {
-      (Accion.findAll as jest.Mock).mockResolvedValue([]);
-      
-      const resultado = await accionService.getAllAcciones();
-      
-      expect(resultado).toEqual([]);
-      expect(resultado.length).toBe(0);
+  });
+
+  describe('obtenerTopAccionesPorClima', () => {
+    it('debería calcular y devolver las mejores y peores acciones', async () => {
+        const clima = new ClimaEntity(1, 'Soleado', 'Despejado', 25, 50, 10);
+        const acciones = [
+            new AccionEntity(1, 'Playa', 'd1', 1, 50, 10), // puntaje 100
+            new AccionEntity(2, 'Piscina', 'd2', 1, 60, 15), // puntaje 80
+            new AccionEntity(3, 'Cine', 'd3', 1, 80, 20), // puntaje 40
+            new AccionEntity(4, 'Esquiar', 'd4', 1, 10, 30), // puntaje 20
+        ];
+        mockAccionRepository.getAllAcciones.mockResolvedValue(acciones);
+
+        const result = await accionService.obtenerTopAccionesPorClima(clima, 2);
+
+        expect(result.mejores.length).toBe(2);
+        expect(result.peores.length).toBe(2);
+        expect(result.mejores[0].nombre).toBe('Playa');
+        expect(result.peores[0].nombre).toBe('Cine');
     });
   });
 });

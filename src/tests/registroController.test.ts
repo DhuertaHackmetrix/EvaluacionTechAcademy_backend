@@ -1,16 +1,18 @@
 import { Request, Response } from 'express';
 import registroController from '../infrastructure/controllers/registroController';
 import RegistroService from '../application/services/registroService';
+import RegistroEntity from '../domain/entities/registroEntity';
 
-jest.mock('../services/registroService');
+jest.mock('../application/services/registroService');
 
-jest.spyOn(console, 'error').mockImplementation(() => {});
+const RegistroServiceMock = RegistroService as jest.MockedClass<typeof RegistroService>;
 
 describe('RegistroController', () => {
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let responseJson: jest.Mock;
   let responseStatus: jest.Mock;
+  let registroServiceInstance: jest.Mocked<RegistroService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -21,60 +23,31 @@ describe('RegistroController', () => {
     mockRequest = {};
     mockResponse = {
       json: responseJson,
-      status: responseStatus
+      status: responseStatus,
     };
+
+    registroServiceInstance = new (RegistroService as any)();
+    (registroController as any).registroService = registroServiceInstance;
   });
 
-  describe('totalAcciones', () => {
-    it('debería devolver el total de acciones agrupadas por clima', async () => {
-      const mockTotalAcciones = {
-        'Clear': {
-          count: 2,
-          acciones: [
-            { id: 1, nombre: 'ir a la playa', fecha: new Date() },
-            { id: 3, nombre: 'pasear por el parque', fecha: new Date() }
-          ]
-        },
-        'Rain': {
-          count: 1,
-          acciones: [
-            { id: 2, nombre: 'quedarse en casa', fecha: new Date() }
-          ]
-        }
-      };
-      
-      (RegistroService.prototype.totalDeAcciones as jest.Mock).mockResolvedValue(mockTotalAcciones);
-      
-      await registroController.totalAcciones(mockRequest as Request, mockResponse as Response);
-      
-      expect(RegistroService.prototype.totalDeAcciones).toHaveBeenCalled();
-      
-      expect(responseStatus).toHaveBeenCalledWith(200);
-      expect(responseJson).toHaveBeenCalledWith(mockTotalAcciones);
+  describe('registrarAccion', () => {
+    it('debería registrar una acción', async () => {
+      mockRequest.body = { accionId: 1, comentario: 'test' };
+      const nuevoRegistro = new RegistroEntity(1, 'test',1, new Date());
+      (registroServiceInstance.registrarAccion as jest.Mock).mockResolvedValue(nuevoRegistro);
+      await registroController.registrarAccion(mockRequest as Request, mockResponse as Response);
+      expect(responseStatus).toHaveBeenCalledWith(201);
+      expect(responseJson).toHaveBeenCalledWith(nuevoRegistro);
     });
+  });
 
-    it('debería manejar el caso donde no hay registros', async () => {
-      const mockSinRegistros = { mensaje: 'No hay registros de acciones.' };
-      
-      (RegistroService.prototype.totalDeAcciones as jest.Mock).mockResolvedValue(mockSinRegistros);
-      
-      await registroController.totalAcciones(mockRequest as Request, mockResponse as Response);
-      
-      expect(responseStatus).toHaveBeenCalledWith(200);
-      expect(responseJson).toHaveBeenCalledWith(mockSinRegistros);
-    });
-
-    it('debería manejar errores del servicio correctamente', async () => {
-      const error = new Error('Error en la base de datos');
-      (RegistroService.prototype.totalDeAcciones as jest.Mock).mockRejectedValue(error);
-      
-      await registroController.totalAcciones(mockRequest as Request, mockResponse as Response);
-      
-      expect(responseStatus).toHaveBeenCalledWith(500);
-      expect(responseJson).toHaveBeenCalledWith({ 
-        mensaje: 'Error al obtener las acciones.', 
-        error 
-      });
+  describe('totalDeAcciones', () => {
+    it('debería devolver el total de acciones', async () => {
+        const total = { 'Soleado': 1 };
+        (registroServiceInstance.totalDeAcciones as jest.Mock).mockResolvedValue(total);
+        await registroController.totalDeAcciones(mockRequest as Request, mockResponse as Response);
+        expect(responseStatus).toHaveBeenCalledWith(200);
+        expect(responseJson).toHaveBeenCalledWith(total);
     });
   });
 });

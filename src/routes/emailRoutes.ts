@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import EmailController from '../infrastructure/controllers/emailController';
+import emailController from '../infrastructure/controllers/emailController';
 
 const router = Router();
-const emailController = new EmailController();
 
 /**
  * @route POST /api/email/welcome
@@ -17,5 +16,19 @@ router.post('/welcome', (req, res) => emailController.sendWelcomeEmail(req, res)
  * @body { email: string, subject: string, message: string }
  */
 router.post('/test', (req, res) => emailController.sendTestEmail(req, res));
+
+/**
+ * @route POST /api/email/daily-summary
+ * @description Envía un resumen diario del clima y actividades
+ * @body { email: string, ciudad: string }
+ */
+router.post('/daily-summary', (req, res) => emailController.sendDailySummary(req, res));
+
+/**
+ * @route POST /api/email/weekly-summary
+ * @description Envía un resumen semanal de actividades
+ * @body { email: string }
+ */
+router.post('/weekly-summary', (req, res) => emailController.sendWeeklySummary(req, res));
 
 export default router;

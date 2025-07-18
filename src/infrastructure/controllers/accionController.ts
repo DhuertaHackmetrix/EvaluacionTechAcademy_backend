@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import AccionService from '../../application/services/accionService';
+import AccionRepository from '../repositories/AccionRepository';
+import RegistroRepository from '../repositories/RegistroRepository';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -8,42 +10,32 @@ class AccionController {
   public accionService: AccionService;
 
   constructor() {
-    this.accionService = new AccionService();
+    const accionRepository = new AccionRepository();
+    const registroRepository = new RegistroRepository();
+    this.accionService = new AccionService(accionRepository, registroRepository);
   }
 
   async crearAccion(req: Request, res: Response): Promise<void> {
-    const { accion,nombreClima,descripcionAccion } = req.body;
-    
-    if (!accion) {
-      res.status(400).json({ mensaje: 'Debes proporcionar una acción.' });
-      return;
-    }
-
     try {
-      const nuevaAccion = await this.accionService.crearAccion(accion,nombreClima,descripcionAccion);
+      const { accion, nombreClima, descripcionAccion } = req.body;
+      const nuevaAccion = await this.accionService.crearAccion(accion, nombreClima, descripcionAccion);
       res.status(201).json(nuevaAccion);
-    } catch (error) {
-      res.status(500).json({ mensaje: 'Error al crear la acción.', error });
+    } catch (error: any) {
+      res.status(500).json({ mensaje: 'Error al crear la acción.', error: error.message });
     }
   }
 
   async leerAccion(req: Request, res: Response): Promise<void> {
-    const { id } = req.params;
-
-    if (!id) {
-      res.status(400).json({ mensaje: 'Debes proporcionar un ID.' });
-      return;
-    }
-
     try {
+      const { id } = req.params;
       const accion = await this.accionService.leerAccion(Number(id));
-      if (!accion) {
+      if (accion) {
+        res.status(200).json(accion);
+      } else {
         res.status(404).json({ mensaje: 'Acción no encontrada.' });
-        return;
       }
-      res.status(200).json(accion);
-    } catch (error) {
-      res.status(500).json({ mensaje: 'Error al leer la acción.', error });
+    } catch (error: any) {
+      res.status(500).json({ mensaje: 'Error al leer la acción.', error: error.message });
     }
   }
 

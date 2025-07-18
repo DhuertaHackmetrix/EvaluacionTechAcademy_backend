@@ -11,8 +11,8 @@ dotenv.config();
 class ClimaService implements IClimaService {
   private climaRepository: IClimaRepository;
 
-  constructor() {
-    this.climaRepository = new ClimaRepository();
+  constructor(climaRepository: IClimaRepository) {
+    this.climaRepository = climaRepository;
   }
 
   async obtenerClimaActual(ciudad: string): Promise<ClimaEntity> {
@@ -47,9 +47,9 @@ class ClimaService implements IClimaService {
       return [acciones, accionElegida];
     } catch (error) {
       console.error('Error al obtener acciones:', error);
-      throw new Error('No se pudo obtener las acciones');
+      throw error;
     }
   }
 }
 
-export const climaService = new ClimaService();
+export default ClimaService;
